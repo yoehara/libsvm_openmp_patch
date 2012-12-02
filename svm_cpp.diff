@@ -1,0 +1,26 @@
+--- svm_orig.cpp	2012-12-03 04:09:21.564615302 +0900
++++ svm.cpp	2012-12-03 04:08:04.715166984 +0900
+@@ -1282,6 +1282,7 @@
+ 		int start, j;
+ 		if((start = cache->get_data(i,&data,len)) < len)
+ 		{
++#pragma omp parallel for private(j) 
+ 			for(j=start;j<len;j++)
+ 				data[j] = (Qfloat)(y[i]*y[j]*(this->*kernel_function)(i,j));
+ 		}
+@@ -2484,6 +2485,7 @@
+ 	{
+ 		double *sv_coef = model->sv_coef[0];
+ 		double sum = 0;
++#pragma omp parallel for private(i) reduction(+:sum) 
+ 		for(i=0;i<model->l;i++)
+ 			sum += sv_coef[i] * Kernel::k_function(x,model->SV[i],model->param);
+ 		sum -= model->rho[0];
+@@ -2500,6 +2502,7 @@
+ 		int l = model->l;
+ 		
+ 		double *kvalue = Malloc(double,l);
++#pragma omp parallel for private(i) 
+ 		for(i=0;i<l;i++)
+ 			kvalue[i] = Kernel::k_function(x,model->SV[i],model->param);
+ 
